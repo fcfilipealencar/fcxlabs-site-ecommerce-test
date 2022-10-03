@@ -66,7 +66,8 @@ const moduleExports = {
 
 const sentryWebpackPluginOptions = {
     silent: true, // Suppresses all logs,
-    authToken: process.env.SENTRY_AUTH_TOKEN,
+    authToken:
+        "f0fbb841cffa4fa28aa14d62d10ee31c33360712abc1428ca5554839726d20d8",
 };
 
 module.exports = withSentryConfig(
