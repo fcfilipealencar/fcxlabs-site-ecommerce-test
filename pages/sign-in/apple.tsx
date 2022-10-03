@@ -8,7 +8,7 @@ const SignInPage = () => {
     useEffect(() => {
         if (!(status === "loading") && !session) void signIn("apple");
 
-        if (session !== null) window.close();
+        if (session) window.close();
     }, [session, status]);
 
     return <SignInStyle />;
