@@ -1,7 +1,6 @@
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import NewWindow from "react-new-window";
-import AppleLogin from "react-apple-login";
 import { theme } from "../../../../helpers/themes";
 import { Button } from "../../../../ui/Button";
 import { Apple, Google } from "../../../../ui/Icons";
@@ -43,10 +42,6 @@ const FormHeader = () => {
                     fontWeight={theme.typography.fontWeight[500]}
                     color={theme.colors.neutral["000"]}
                 >
-                    <AppleLogin
-                        clientId="com.ferreiracosta.siteecommerce.client.test"
-                        redirectURI="https://ferreiracosta.com"
-                    />
                     {(session as unknown as sessionType)?.token?.provider ===
                     "apple"
                         ? "Sair"
