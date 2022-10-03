@@ -85,8 +85,10 @@ const FormBody = () => {
             : {
                   genders: "",
                   birthdays: { year: "", month: "", day: "" },
-                  emailAddresses: "",
-                  names: "",
+                  emailAddresses: session.user?.email
+                      ? session.user?.email
+                      : "",
+                  names: session.user?.name ? session.user?.name : "",
               }
     );
     const insertCliente = (body: ProfileDto) => {
