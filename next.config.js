@@ -68,4 +68,10 @@ const sentryWebpackPluginOptions = {
     silent: true, // Suppresses all logs,
 };
 
-module.exports = withSentryConfig(moduleExports, sentryWebpackPluginOptions);
+module.exports = withSentryConfig(
+    moduleExports,
+    {
+        dryRun: process.env.VERCEL_ENV !== "production",
+    },
+    sentryWebpackPluginOptions
+);
