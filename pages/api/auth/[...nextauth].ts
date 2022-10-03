@@ -22,9 +22,7 @@ export default NextAuth({
             clientId: process.env.APPLE_CLIENT_ID!,
             clientSecret: process.env.APPLE_CLIENT_SECRET!,
             authorization: {
-                params: {
-                    scope: "name email phone",
-                },
+                params: { scope: "name email", response_mode: "form_post" },
             },
         }),
     ],
