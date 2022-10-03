@@ -105,6 +105,7 @@ const FormBody = () => {
 
     console.log("session ", session);
 
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     useEffect(() => {
         if (idToken) {
             OAuth(`${providerAuth}Auth`, idToken)
@@ -117,7 +118,15 @@ const FormBody = () => {
                     setUserIsExist(false);
                     setIsUserAuthenticated(false);
                     openSnackbarWarning(
-                        "Para continuar, por favor digite seu CPF e telefone",
+                        `Para continuar, por favor informe seu ${
+                            oAuthForm?.names ? "" : "nome, "
+                        }CPF${
+                            oAuthForm?.birthdays.day
+                                ? ""
+                                : " Data de Nascimento, "
+                        }${oAuthForm?.genders ? "" : "sexo, "}${
+                            oAuthForm?.emailAddresses ? "" : "email"
+                        } e telefone`,
                         [10000]
                     );
                 });
@@ -321,7 +330,7 @@ const FormBody = () => {
                                                 placeholder="Ex. 01/01/1990"
                                                 register={register}
                                                 required={
-                                                    oAuthForm?.birthdays !==
+                                                    oAuthForm?.birthdays.day !==
                                                     undefined
                                                         ? undefined
                                                         : "O campo data de nascimento é obrigatório!"
