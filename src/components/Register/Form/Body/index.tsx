@@ -85,10 +85,8 @@ const FormBody = () => {
             : {
                   genders: "",
                   birthdays: { year: "", month: "", day: "" },
-                  emailAddresses: session.user?.email
-                      ? session.user?.email
-                      : "",
-                  names: session.user?.name ? session.user?.name : "",
+                  emailAddresses: "",
+                  names: "",
               }
     );
     const insertCliente = (body: ProfileDto) => {
@@ -127,6 +125,12 @@ const FormBody = () => {
 
         console.log(isUserAuthenticated);
         console.log("userIsExist ", userIsExist);
+        setOAuthForm({
+            genders: "",
+            birthdays: { year: "", month: "", day: "" },
+            emailAddresses: session?.user?.email ? session.user?.email : "",
+            names: session?.user?.name ? session.user?.name : "",
+        });
 
         GoogleAuthenticate(accessToken).then((res: GoogleTypes) => {
             console.log("res ", res);
