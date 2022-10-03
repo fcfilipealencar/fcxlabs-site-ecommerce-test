@@ -34,6 +34,14 @@ export default NextAuth({
                 token.id_token = account.id_token;
                 token.account = account;
                 token.provider = account.provider;
+                token.settingApple = AppleProvider({
+                    clientId: process.env.APPLE_CLIENT_ID!,
+                    clientSecret: process.env.APPLE_CLIENT_SECRET!,
+                });
+                token.settingGoogle = GoogleProvider({
+                    clientId: process.env.GOOGLE_ID,
+                    clientSecret: process.env.GOOGLE_SECRET,
+                });
                 user && (token.user = user);
             }
             return token;
