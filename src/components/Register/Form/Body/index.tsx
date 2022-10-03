@@ -125,12 +125,14 @@ const FormBody = () => {
 
         console.log(isUserAuthenticated);
         console.log("userIsExist ", userIsExist);
-        setOAuthForm({
-            genders: "",
-            birthdays: { year: "", month: "", day: "" },
-            emailAddresses: session?.user?.email ? session.user?.email : "",
-            names: session?.user?.name ? session.user?.name : "",
-        });
+        if (providerAuth === "apple") {
+            setOAuthForm({
+                genders: "",
+                birthdays: { year: "", month: "", day: "" },
+                emailAddresses: session?.user?.email ? session.user?.email : "",
+                names: session?.user?.name ? session.user?.name : "",
+            });
+        }
 
         GoogleAuthenticate(accessToken).then((res: GoogleTypes) => {
             console.log("res ", res);
