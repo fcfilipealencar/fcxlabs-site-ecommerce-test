@@ -21,6 +21,11 @@ export default NextAuth({
         AppleProvider({
             clientId: process.env.APPLE_CLIENT_ID!,
             clientSecret: process.env.APPLE_CLIENT_SECRET!,
+            authorization: {
+                params: {
+                    scope: "name email phone",
+                },
+            },
         }),
     ],
     secret: process.env.SECRET,
