@@ -350,7 +350,21 @@ const FormBody = () => {
                                                     undefined
                                                         ? undefined
                                                         : new Date(
-                                                              `${oAuthForm?.birthdays.year}-${oAuthForm?.birthdays.month}-${oAuthForm?.birthdays?.day}`
+                                                              `${
+                                                                  oAuthForm
+                                                                      ?.birthdays
+                                                                      .year
+                                                              }-${
+                                                                  oAuthForm
+                                                                      ?.birthdays
+                                                                      .month
+                                                              }-${
+                                                                  Number(
+                                                                      oAuthForm
+                                                                          ?.birthdays
+                                                                          ?.day
+                                                                  ) + 1
+                                                              }`
                                                           ).toLocaleDateString()
                                                 }
                                             />
@@ -503,6 +517,12 @@ const FormBody = () => {
                                                     message: "E-mail inválido",
                                                 }}
                                                 hasError={!!errors.email}
+                                                setValue={() =>
+                                                    oAuthForm?.emailAddresses ===
+                                                    undefined
+                                                        ? undefined
+                                                        : oAuthForm.emailAddresses
+                                                }
                                                 value={
                                                     oAuthForm?.emailAddresses ===
                                                     undefined
