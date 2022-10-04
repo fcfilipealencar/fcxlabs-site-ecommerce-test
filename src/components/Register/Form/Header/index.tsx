@@ -1,6 +1,6 @@
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
-import NewWindow from "react-new-window";
+// import NewWindow from "react-new-window";
 import OauthPopup from "react-oauth-popup";
 import { theme } from "../../../../helpers/themes";
 import { Button } from "../../../../ui/Button";
@@ -15,7 +15,7 @@ interface sessionType {
 }
 
 const FormHeader = () => {
-    const [popupApple, setPopUpApple] = useState(false);
+    // const [popupApple, setPopUpApple] = useState(false);
     const [popupGoogle, setPopUpGoogle] = useState(false);
     const { data: session } = useSession();
     return (
@@ -24,7 +24,7 @@ const FormHeader = () => {
                 url="/sign-in/apple"
                 onCode={() => console.log("sucess")}
                 onClose={() => console.log("closed")}
-                title="Google Sign-in"
+                title="Apple Sign-in"
                 width={565}
                 height={565}
             >
@@ -61,36 +61,47 @@ const FormHeader = () => {
                     </Text>
                 </Button>
             </OauthPopup>
-            <Button
-                style={{ height: "48px" }}
-                width="142.55px"
-                backgroundColor="#d34836"
-                mouseOverColor={theme.colors.primary["200"]}
-                rounded
-                onClick={() =>
-                    session
-                        ? (session as unknown as sessionType)?.token
-                              ?.provider === "google"
-                            ? session
-                                ? signOut()
-                                : setPopUpGoogle(!popupGoogle)
-                            : null
-                        : setPopUpGoogle(!popupGoogle)
-                }
+            <OauthPopup
+                url="/sign-in/google"
+                onCode={() => console.log("sucess")}
+                onClose={() => console.log("closed")}
+                title="Google Sign-in"
+                width={565}
+                height={565}
             >
-                <Google color={theme.colors.neutral["000"]} strokeWidth="2.5" />
-                <Text
-                    fontSize={theme.typography.fontSize.xs}
-                    fontWeight={theme.typography.fontWeight[500]}
+                <Button
+                    style={{ height: "48px" }}
+                    width="142.55px"
+                    backgroundColor="#d34836"
+                    mouseOverColor={theme.colors.primary["200"]}
+                    rounded
+                    onClick={() =>
+                        session
+                            ? (session as unknown as sessionType)?.token
+                                  ?.provider === "google"
+                                ? session
+                                    ? signOut()
+                                    : setPopUpGoogle(!popupGoogle)
+                                : null
+                            : setPopUpGoogle(!popupGoogle)
+                    }
                 >
-                    {(session as unknown as sessionType)?.token?.provider ===
-                    "google"
-                        ? "Sair"
-                        : "Google"}
-                </Text>
-            </Button>
-
-            {popupApple ? (
+                    <Google
+                        color={theme.colors.neutral["000"]}
+                        strokeWidth="2.5"
+                    />
+                    <Text
+                        fontSize={theme.typography.fontSize.xs}
+                        fontWeight={theme.typography.fontWeight[500]}
+                    >
+                        {(session as unknown as sessionType)?.token
+                            ?.provider === "google"
+                            ? "Sair"
+                            : "Google"}
+                    </Text>
+                </Button>
+            </OauthPopup>
+            {/* {popupApple ? (
                 <NewWindow
                     features={{
                         width: 565,
@@ -113,7 +124,7 @@ const FormHeader = () => {
                     url="/sign-in/google"
                     onBlock={() => setPopUpGoogle(false)}
                 />
-            ) : null}
+            ) : null} */}
         </ButtonsAuthContainer>
     );
 };
