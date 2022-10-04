@@ -120,9 +120,6 @@ const FormBody = () => {
                             }`,
                             [5000]
                         );
-                        setTimeout(() => {
-                            return router.push("/");
-                        }, 5000);
                     }
                 })
                 .catch(() => {
