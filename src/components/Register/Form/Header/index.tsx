@@ -1,5 +1,5 @@
 import { signOut, useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import NewWindow from "react-new-window";
 import { theme } from "../../../../helpers/themes";
 import { Button } from "../../../../ui/Button";
@@ -16,14 +16,14 @@ interface sessionType {
 const FormHeader = () => {
     const [popupApple, setPopUpApple] = useState(false);
     const [popupGoogle, setPopUpGoogle] = useState(false);
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
 
-    useEffect(() => {
-        if (status === "authenticated") {
-            setPopUpApple(false);
-            setPopUpGoogle(false);
-        }
-    }, [status]);
+    // useEffect(() => {
+    //     if (status === "authenticated") {
+    //         setPopUpApple(false);
+    //         setPopUpGoogle(false);
+    //     }
+    // }, [status]);
     return (
         <ButtonsAuthContainer>
             <Button

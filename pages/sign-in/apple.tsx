@@ -7,13 +7,9 @@ const SignInPage = () => {
     const { data: session, status } = useSession();
     useEffect(() => {
         if (!(status === "loading") && !session)
-            void signIn("apple").then(() => {
-                if (session) window.close();
-            });
+            void signIn("apple", { callbackUrl: "/sign-in/apple" });
 
-        if (status === "authenticated") {
-            window.close();
-        }
+        if (session) window.close();
     }, [session, status]);
 
     return <SignInStyle />;
