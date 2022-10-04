@@ -1,7 +1,7 @@
 /* eslint-disable no-void */
 import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { SignInStyle } from "./styles";
+import { ContentSignInStyle, SignInStyle } from "./styles";
 
 const SignInPage = () => {
     const { data: session, status } = useSession();
@@ -15,7 +15,11 @@ const SignInPage = () => {
         if (session) window.close();
     }, [session, status]);
 
-    return <SignInStyle />;
+    return (
+        <ContentSignInStyle>
+            <SignInStyle />
+        </ContentSignInStyle>
+    );
 };
 
 export default SignInPage;
