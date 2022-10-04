@@ -8,8 +8,7 @@ const SignInPage = () => {
     useEffect(() => {
         if (!(status === "loading") && !session) void signIn("apple");
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        if ("expires" in session!) window.close();
+        if (session) window.close();
     }, [session, status]);
 
     return <SignInStyle />;

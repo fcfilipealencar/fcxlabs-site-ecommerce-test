@@ -71,7 +71,6 @@ const FormBody = () => {
         optionsSnackbar("rgb(211, 72, 54)")
     );
     const { data: session } = useSession();
-    const [userIsExist, setUserIsExist] = useState(false);
     const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
     const idToken = (session as unknown as sessionType)?.token?.id_token;
     const providerAuth = (session as unknown as sessionType)?.token?.provider;
@@ -103,8 +102,6 @@ const FormBody = () => {
             });
     };
 
-    console.log("session ", session);
-
     // eslint-disable-next-line sonarjs/cognitive-complexity
     useEffect(() => {
         if (idToken) {
@@ -112,10 +109,17 @@ const FormBody = () => {
                 .then(res => {
                     console.log("OAuth ", res);
                     setIsUserAuthenticated("access_token" in res);
-                    setUserIsExist("access_token" in res);
+                    if ("access_token" in res) {
+                        openSnackbarSucess(
+                            `Bem-vindo(a) de volta ${session?.user?.name}`,
+                            [5000]
+                        );
+                        setTimeout(() => {
+                            return router.push("/");
+                        }, 5000);
+                    }
                 })
                 .catch(() => {
-                    setUserIsExist(false);
                     setIsUserAuthenticated(false);
                     openSnackbarWarning(
                         `Para continuar, por favor informe seu ${
@@ -132,8 +136,6 @@ const FormBody = () => {
                 });
         }
 
-        console.log(isUserAuthenticated);
-        console.log("userIsExist ", userIsExist);
         if (providerAuth === "apple") {
             setOAuthForm({
                 genders: "",
