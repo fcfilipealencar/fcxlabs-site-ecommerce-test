@@ -106,6 +106,7 @@ const FormBody = () => {
 
     console.log("session ", session);
 
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     useEffect(() => {
         if (idToken) {
             OAuth(`${providerAuth}Auth`, idToken)
@@ -114,7 +115,9 @@ const FormBody = () => {
                     setIsUserAuthenticated("access_token" in res);
                     if ("access_token" in res) {
                         openSnackbarSucess(
-                            `Bem-vindo(a) de volta ${session?.user?.name}`,
+                            `Bem-vindo(a) de volta ${
+                                session?.user?.name ? session?.user?.name : ""
+                            }`,
                             [5000]
                         );
                         setTimeout(() => {
