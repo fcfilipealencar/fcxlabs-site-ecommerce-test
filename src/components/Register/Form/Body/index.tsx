@@ -79,7 +79,7 @@ const FormBody = () => {
     const { isClientMobile, clientBranchId } = useAppContext();
 
     const [oAuthForm, setOAuthForm] = useState(
-        session == null
+        session === null
             ? undefined
             : {
                   genders: "",
@@ -98,11 +98,14 @@ const FormBody = () => {
                     ]);
             })
             .catch(e => {
-                openSnackbarError(e.response.data.errors.Messages[0], [5000]);
+                openSnackbarError(e?.response?.data?.errors?.Messages[0], [
+                    5000,
+                ]);
             });
     };
 
-    // eslint-disable-next-line sonarjs/cognitive-complexity
+    console.log("session ", session);
+
     useEffect(() => {
         if (idToken) {
             OAuth(`${providerAuth}Auth`, idToken)
@@ -122,15 +125,7 @@ const FormBody = () => {
                 .catch(() => {
                     setIsUserAuthenticated(false);
                     openSnackbarWarning(
-                        `Para continuar, por favor informe seu ${
-                            oAuthForm?.names ? "" : "nome, "
-                        }CPF${
-                            oAuthForm?.birthdays.day
-                                ? ""
-                                : " Data de Nascimento, "
-                        }${oAuthForm?.genders ? "" : "sexo, "}${
-                            oAuthForm?.emailAddresses ? "" : "email"
-                        } e telefone`,
+                        "Para continuar, por favor digite seu CPF e telefone",
                         [10000]
                     );
                 });
@@ -148,42 +143,38 @@ const FormBody = () => {
         GoogleAuthenticate(accessToken).then((res: GoogleTypes) => {
             console.log("res ", res);
             if (res && isUserAuthenticated === false) {
-                setOAuthForm({
-                    genders: res?.genders?.[0]?.value,
-                    birthdays: {
-                        year: res?.birthdays?.[0]?.date?.year,
-                        month: res?.birthdays?.[0]?.date?.month,
-                        // eslint-disable-next-line no-unsafe-optional-chaining
-                        day: res?.birthdays?.[0]?.date?.day + 1,
-                    },
-                    emailAddresses: res?.emailAddresses?.[0]?.value,
-                    names: res?.names?.[0]?.displayName,
-                });
+                setOAuthForm(
+                    session === null
+                        ? undefined
+                        : {
+                              genders: res?.genders?.[0]?.value,
+                              birthdays: {
+                                  year: res?.birthdays?.[0]?.date?.year,
+                                  month: res?.birthdays?.[0]?.date?.month,
+                                  // eslint-disable-next-line no-unsafe-optional-chaining
+                                  day: res?.birthdays?.[0]?.date?.day,
+                              },
+                              emailAddresses: res?.emailAddresses?.[0]?.value,
+                              names: res?.names?.[0]?.displayName,
+                          }
+                );
             }
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accessToken]);
 
     const onSubmit = (Formdata: unknown) => {
-        const body = oAuthForm
-            ? {
-                  ...(Formdata as ProfileDto),
-                  defaultBranchId: clientBranchId,
-                  name: oAuthForm.names,
-                  gender: oAuthForm.genders,
-                  email: oAuthForm.emailAddresses,
-                  birthdate: new Date(
-                      `${oAuthForm.birthdays.day}/${oAuthForm.birthdays.month}/${oAuthForm.birthdays.year}`
-                  ).toJSON(),
-              }
-            : {
-                  ...(Formdata as ProfileDto),
-                  defaultBranchId: clientBranchId,
-              };
-        console.log(body);
+        const body = {
+            ...(Formdata as ProfileDto),
+            defaultBranchId: clientBranchId,
+        };
+
+        console.log("Formdata ", Formdata);
+        console.log("body ", body);
+
         // eslint-disable-next-line no-unused-expressions
         oAuthForm !== undefined
-            ? OAuth("googleAuth", idToken, body.cpf)
+            ? OAuth(`${providerAuth}Auth`, idToken, body.cpf)
                   .then(res => {
                       console.log("OAuth ", res);
 
@@ -332,8 +323,8 @@ const FormBody = () => {
                                                 placeholder="Ex. 01/01/1990"
                                                 register={register}
                                                 required={
-                                                    oAuthForm?.birthdays.day !==
-                                                    undefined
+                                                    oAuthForm?.birthdays
+                                                        .year !== undefined
                                                         ? undefined
                                                         : "O campo data de nascimento é obrigatório!"
                                                 }
@@ -345,7 +336,7 @@ const FormBody = () => {
                                                 hasError={!!errors.birthday}
                                                 onBlur={({ target }) =>
                                                     setValue(
-                                                        "birthday",
+                                                        "birthdate",
                                                         target.value.replace(
                                                             /[^0-9]/g,
                                                             ""
@@ -353,23 +344,11 @@ const FormBody = () => {
                                                     )
                                                 }
                                                 value={
-                                                    oAuthForm?.birthdays ===
+                                                    oAuthForm?.birthdays.day ===
                                                     undefined
                                                         ? undefined
                                                         : new Date(
-                                                              `${
-                                                                  oAuthForm
-                                                                      .birthdays
-                                                                      .year
-                                                              }-${
-                                                                  oAuthForm
-                                                                      .birthdays
-                                                                      .month
-                                                              }-${Number(
-                                                                  oAuthForm
-                                                                      .birthdays
-                                                                      .day
-                                                              )}`
+                                                              `${oAuthForm?.birthdays.year}-${oAuthForm?.birthdays.month}-${oAuthForm?.birthdays?.day}`
                                                           ).toLocaleDateString()
                                                 }
                                             />
@@ -512,7 +491,8 @@ const FormBody = () => {
                                                 placeholder="Ex. francisca@mail.com"
                                                 register={register}
                                                 required={
-                                                    oAuthForm !== undefined
+                                                    oAuthForm?.emailAddresses !==
+                                                    undefined
                                                         ? undefined
                                                         : "O campo e-mail é obrigatório!"
                                                 }
