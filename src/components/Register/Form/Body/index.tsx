@@ -105,7 +105,7 @@ const FormBody = () => {
     };
 
     console.log("session ", session);
-    console.log("status auth ", status);
+    console.log("status ", status);
 
     // eslint-disable-next-line sonarjs/cognitive-complexity
     useEffect(() => {
