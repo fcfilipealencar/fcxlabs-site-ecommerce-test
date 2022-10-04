@@ -70,7 +70,7 @@ const FormBody = () => {
     const [openSnackbarError] = useSnackbar(
         optionsSnackbar("rgb(211, 72, 54)")
     );
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
     const idToken = (session as unknown as sessionType)?.token?.id_token;
     const providerAuth = (session as unknown as sessionType)?.token?.provider;
@@ -105,6 +105,7 @@ const FormBody = () => {
     };
 
     console.log("session ", session);
+    console.log("status ", status);
 
     // eslint-disable-next-line sonarjs/cognitive-complexity
     useEffect(() => {
