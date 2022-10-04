@@ -71,6 +71,7 @@ const FormBody = () => {
         optionsSnackbar("rgb(211, 72, 54)")
     );
     const { data: session, status } = useSession();
+    const [birthdateValue, setBirthdateValue] = useState("");
     const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
     const idToken = (session as unknown as sessionType)?.token?.id_token;
     const providerAuth = (session as unknown as sessionType)?.token?.provider;
@@ -98,14 +99,16 @@ const FormBody = () => {
                     ]);
             })
             .catch(e => {
-                openSnackbarError(e?.response?.data?.errors?.Messages[0], [
-                    5000,
-                ]);
+                openSnackbarError(
+                    e?.response?.data?.errors?.Messages?.[0] ??
+                        "Ocorreu um erro ao cadastrar",
+                    [5000]
+                );
             });
     };
 
     console.log("session ", session);
-    console.log("status auth ", status);
+    console.log("status teste", status);
 
     // eslint-disable-next-line sonarjs/cognitive-complexity
     useEffect(() => {
@@ -133,12 +136,18 @@ const FormBody = () => {
         }
 
         if (providerAuth === "apple") {
-            setOAuthForm({
-                genders: "",
-                birthdays: { year: "", month: "", day: "" },
-                emailAddresses: session?.user?.email ? session.user?.email : "",
-                names: session?.user?.name ? session.user?.name : "",
-            });
+            setOAuthForm(
+                session === null
+                    ? undefined
+                    : {
+                          genders: "",
+                          birthdays: { year: "", month: "", day: "" },
+                          emailAddresses: session?.user?.email
+                              ? session.user?.email
+                              : "",
+                          names: session?.user?.name ? session.user?.name : "",
+                      }
+            );
         }
 
         GoogleAuthenticate(accessToken).then((res: GoogleTypes) => {
@@ -164,39 +173,43 @@ const FormBody = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accessToken]);
 
+    console.log("oAuthForm ", oAuthForm);
+
     const onSubmit = (Formdata: unknown) => {
         const body = {
             ...(Formdata as ProfileDto),
+            birthdate: new Date(birthdateValue).toISOString(),
             defaultBranchId: clientBranchId,
         };
 
         console.log("Formdata ", Formdata);
         console.log("body ", body);
 
-        // eslint-disable-next-line no-unused-expressions
-        oAuthForm !== undefined
-            ? OAuth(`${providerAuth}Auth`, idToken, body.cpf)
-                  .then(res => {
-                      console.log("OAuth ", res);
+        if (session) {
+            OAuth(`${providerAuth}Auth`, idToken, body.cpf)
+                .then(res => {
+                    console.log("OAuth ", res);
 
-                      if ("access_token" in res) {
-                          openSnackbarSucess(
-                              `Bem-vindo(a) de volta ${
-                                  session?.user?.name ? session?.user?.name : ""
-                              }`,
-                              [5000]
-                          );
-                          setTimeout(() => {
-                              return router.push("/");
-                          }, 5000);
-                      }
-                  })
-                  // eslint-disable-next-line consistent-return
-                  .catch(e => {
-                      if (e.response.data.error === "invalid_grant")
-                          return insertCliente(body);
-                  })
-            : insertCliente(body);
+                    if ("access_token" in res) {
+                        openSnackbarSucess(
+                            `Bem-vindo(a) de volta ${
+                                session?.user?.name ? session?.user?.name : ""
+                            }`,
+                            [5000]
+                        );
+                        setTimeout(() => {
+                            return router.push("/");
+                        }, 5000);
+                    }
+                })
+                // eslint-disable-next-line consistent-return
+                .catch(e => {
+                    if (e.response.data.error === "invalid_grant")
+                        return insertCliente(body);
+                });
+        } else {
+            insertCliente(body);
+        }
     };
 
     return (
@@ -338,35 +351,15 @@ const FormBody = () => {
                                                 }}
                                                 hasError={!!errors.birthday}
                                                 onBlur={({ target }) =>
-                                                    setValue(
-                                                        "birthdate",
-                                                        target.value.replace(
-                                                            /[^0-9]/g,
-                                                            ""
-                                                        )
+                                                    setBirthdateValue(
+                                                        target.value
                                                     )
                                                 }
                                                 value={
-                                                    oAuthForm?.birthdays.day ===
+                                                    oAuthForm?.birthdays.day !==
                                                     undefined
-                                                        ? undefined
-                                                        : new Date(
-                                                              `${
-                                                                  oAuthForm
-                                                                      ?.birthdays
-                                                                      .year
-                                                              }-${
-                                                                  oAuthForm
-                                                                      ?.birthdays
-                                                                      .month
-                                                              }-${
-                                                                  Number(
-                                                                      oAuthForm
-                                                                          ?.birthdays
-                                                                          ?.day
-                                                                  ) + 1
-                                                              }`
-                                                          ).toLocaleDateString()
+                                                        ? `${oAuthForm?.birthdays?.day}-${oAuthForm?.birthdays.month}-${oAuthForm?.birthdays.year}`
+                                                        : undefined
                                                 }
                                             />
                                             {errors.birthday?.message && (
