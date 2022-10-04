@@ -7,7 +7,7 @@ const SignInPage = () => {
     const { data: session, status } = useSession();
     useEffect(() => {
         if (!(status === "loading") && !session) console.log("Authenticated");
-        void signIn("apple").then(() => window.close());
+        void signIn("apple").then(e => console.log(e));
 
         if (session) window.close();
     }, [session, status]);
