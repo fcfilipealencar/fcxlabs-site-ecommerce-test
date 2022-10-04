@@ -180,7 +180,9 @@ const FormBody = () => {
 
                       if ("access_token" in res) {
                           openSnackbarSucess(
-                              `Bem-vindo(a) de volta ${session?.user?.name}`,
+                              `Bem-vindo(a) de volta ${
+                                  session?.user?.name ? session?.user?.name : ""
+                              }`,
                               [5000]
                           );
                           setTimeout(() => {
