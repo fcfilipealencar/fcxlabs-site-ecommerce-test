@@ -1,6 +1,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import NewWindow from "react-new-window";
+import OauthPopup from "react-oauth-popup";
 import { theme } from "../../../../helpers/themes";
 import { Button } from "../../../../ui/Button";
 import { Apple, Google } from "../../../../ui/Icons";
@@ -19,35 +20,47 @@ const FormHeader = () => {
     const { data: session } = useSession();
     return (
         <ButtonsAuthContainer>
-            <Button
-                style={{ height: "48px" }}
-                width="142.55px"
-                backgroundColor={theme.colors.neutral["600"]}
-                mouseOverColor={theme.colors.neutral["800"]}
-                rounded
-                onClick={() =>
-                    session
-                        ? (session as unknown as sessionType)?.token
-                              ?.provider === "apple"
-                            ? session
-                                ? signOut()
-                                : setPopUpApple(!popupApple)
-                            : null
-                        : setPopUpApple(!popupApple)
-                }
+            <OauthPopup
+                url="/sign-in/apple"
+                onCode={() => console.log("sucess")}
+                onClose={() => console.log("closed")}
+                title="Google Sign-in"
+                width={565}
+                height={565}
             >
-                <Apple color={theme.colors.neutral["000"]} strokeWidth="2.5" />
-                <Text
-                    fontSize={theme.typography.fontSize.xs}
-                    fontWeight={theme.typography.fontWeight[500]}
-                    color={theme.colors.neutral["000"]}
+                <Button
+                    style={{ height: "48px" }}
+                    width="142.55px"
+                    backgroundColor={theme.colors.neutral["600"]}
+                    mouseOverColor={theme.colors.neutral["800"]}
+                    rounded
+                    // onClick={() =>
+                    //     session
+                    //         ? (session as unknown as sessionType)?.token
+                    //               ?.provider === "apple"
+                    //             ? session
+                    //                 ? signOut()
+                    //                 : setPopUpApple(!popupApple)
+                    //             : null
+                    //         : setPopUpApple(!popupApple)
+                    // }
                 >
-                    {(session as unknown as sessionType)?.token?.provider ===
-                    "apple"
-                        ? "Sair"
-                        : "Apple"}
-                </Text>
-            </Button>
+                    <Apple
+                        color={theme.colors.neutral["000"]}
+                        strokeWidth="2.5"
+                    />
+                    <Text
+                        fontSize={theme.typography.fontSize.xs}
+                        fontWeight={theme.typography.fontWeight[500]}
+                        color={theme.colors.neutral["000"]}
+                    >
+                        {(session as unknown as sessionType)?.token
+                            ?.provider === "apple"
+                            ? "Sair"
+                            : "Apple"}
+                    </Text>
+                </Button>
+            </OauthPopup>
             <Button
                 style={{ height: "48px" }}
                 width="142.55px"
