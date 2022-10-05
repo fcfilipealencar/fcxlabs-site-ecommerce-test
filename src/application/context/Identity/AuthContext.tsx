@@ -18,6 +18,11 @@ interface AuthContextProps {
     onAuthenticateUser({ login, password }: UserProps): void;
     onAuthenticateUserFromGoogle(): void;
     signOut(): void;
+    keepUserloggedIn: (
+        providerType: string,
+        token: string,
+        accessToken: string
+    ) => void;
 }
 
 interface AuthProviderProps {
@@ -31,6 +36,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const { data: session, status } = useSession();
 
+    const keepUserloggedIn = (
+        providerType: string,
+        token: string,
+        accessToken?: string
+    ) => {
+        localStorage.setItem("@FC:Ecom:Token:Session", token);
+
+        if (providerType === "google" && accessToken)
+            localStorage.setItem("@FC:Ecom:Auth:Google", accessToken);
+
+        const userDataDecoded = jwt<UserData>(token);
+
+        setUserData(userDataDecoded);
+        setIsAuthenticated(true);
+    };
+
     async function onAuthenticateUser({ login, password }: UserProps) {
         try {
             const data = await identityApi.getToken({ login, password });
@@ -40,11 +61,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 return;
             }
 
-            localStorage.setItem("@FC:Ecom:Token:Session", data.access_token);
-            const userDataDecoded = jwt<UserData>(data.access_token);
-
-            setUserData(userDataDecoded);
-            setIsAuthenticated(true);
+            keepUserloggedIn("google", data.access_token);
         } catch (error) {
             console.log(JSON.stringify(error, null, 2));
         }
@@ -62,20 +79,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.log(`3 SESSION: ${JSON.stringify(session, null, 2)}`);
 
         if (status === "authenticated") {
-            const { accessToken } =
+            const { accessToken: token } =
                 session as unknown as GoogleAuthSessionProps;
 
-            const data = await identityApi.getTokenGoogleAuth({ accessToken });
+            const data = await identityApi.getTokenGoogleAuth({
+                accessToken: token,
+            });
 
             if (!data) return null;
 
-            localStorage.setItem("@FC:Ecom:Token:Session", data.access_token);
-            localStorage.setItem("@FC:Ecom:Auth:Google", accessToken.return);
-
-            const userDataDecoded = jwt<UserData>(data.access_token);
-
-            setUserData(userDataDecoded);
-            setIsAuthenticated(true);
+            keepUserloggedIn("google", data.access_token, token.return);
         }
         console.log(`4 SESSION: ${JSON.stringify(session, null, 2)}`);
     }
@@ -112,6 +125,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 onAuthenticateUser,
                 onAuthenticateUserFromGoogle,
                 signOut,
+                keepUserloggedIn,
             }}
         >
             {children}

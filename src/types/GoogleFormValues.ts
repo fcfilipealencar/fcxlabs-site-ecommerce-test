@@ -1,5 +1,8 @@
-/* eslint-disable no-use-before-define */
-
+export interface Birthdate {
+    year: string;
+    month: string;
+    day: string;
+}
 interface typesValue {
     value: string;
 }
@@ -7,14 +10,10 @@ interface typesName {
     displayName: string;
 }
 interface birthdaysValue {
-    date: {
-        year: string;
-        month: string;
-        day: string;
-    };
+    date: Birthdate;
 }
 
-export default interface GoogleTypes {
+export interface GoogleTypes {
     genders: typesValue[];
     birthdays: birthdaysValue[];
     emailAddresses: typesValue[];

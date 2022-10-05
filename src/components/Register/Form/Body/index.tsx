@@ -27,8 +27,9 @@ import Label from "../../../Form/Label";
 import RadioButton from "../../../Form/RadioButton";
 import Link from "../../../Link";
 import { BodyContainer, CreateAccountButtonContainer } from "./style";
-import GoogleTypes from "../../../../types/GoogleFormValues";
-import { OAuth } from "../../../../services/apis/OAuth";
+import { GoogleTypes, Birthdate } from "../../../../types/GoogleFormValues";
+import { identityOAuth } from "../../../../services/apis/Identity/OAuth";
+import { useAuth } from "../../../../application/context/Identity/AuthContext";
 // import { Backdrop } from "../../../BackDrop";
 // import { SimplePopup } from "../../../SimplePopUp";
 
@@ -78,95 +79,96 @@ const FormBody = () => {
     const accessToken = (session as unknown as sessionType)?.token?.accessToken;
     const router = useRouter();
     const { isClientMobile, clientBranchId } = useAppContext();
+    const { keepUserloggedIn } = useAuth();
 
-    const [oAuthForm, setOAuthForm] = useState(
-        session === null
-            ? undefined
-            : {
-                  genders: "",
-                  birthdays: { year: "", month: "", day: "" },
-                  emailAddresses: "",
-                  names: "",
-              }
-    );
+    const getUserFields = (
+        names = "",
+        emailAddresses = "",
+        genders = "",
+        birthdays: Birthdate = { year: "", month: "", day: "" }
+    ) => {
+        return {
+            names,
+            emailAddresses,
+            genders,
+            birthdays,
+        };
+    };
+
+    const [oAuthForm, setOAuthForm] = useState(getUserFields());
     const insertCliente = (body: ProfileDto) => {
         postProfile(body)
             .then(res => {
-                // eslint-disable-next-line no-unused-expressions
-                "id" in res &&
-                    openSnackbarSucess("Usuário Cadastrado com Sucesso", [
-                        5000,
-                    ]);
+                openSnackbarSucess(
+                    "id" in res
+                        ? "Usuário Cadastrado com Sucesso"
+                        : "Ocorreu um erro ao cadastrar",
+                    [5000]
+                );
             })
             .catch(e => {
                 openSnackbarError(
-                    e?.response?.data?.errors?.Messages?.[0] ??
+                    e?.response?.data?.errors?.Messages?.[0] ||
                         "Ocorreu um erro ao cadastrar",
                     [5000]
                 );
             });
     };
 
-    console.log("session ", session);
-    console.log("status teste", status);
+    const handleUserOnIdentity = () => {
+        identityOAuth(`${providerAuth}Auth`, idToken)
+            .then(res => {
+                console.log("OAuth ", res);
+                setIsUserAuthenticated("access_token" in res);
+                if ("access_token" in res) {
+                    openSnackbarSucess(
+                        `Bem-vindo(a) de volta ${session?.user?.name ?? ""}`,
+                        [5000]
+                    );
+                }
+            })
+            .catch(() => {
+                setIsUserAuthenticated(false);
+                openSnackbarWarning(
+                    "Para continuar, por favor digite seu CPF e telefone",
+                    [10000]
+                );
+            });
+    };
 
-    // eslint-disable-next-line sonarjs/cognitive-complexity
+    console.log("session ", session);
+    console.log("status ", status);
+    console.log("isUserAuthenticated ", isUserAuthenticated);
+
     useEffect(() => {
         if (idToken) {
-            OAuth(`${providerAuth}Auth`, idToken)
-                .then(res => {
-                    console.log("OAuth ", res);
-                    setIsUserAuthenticated("access_token" in res);
-                    if ("access_token" in res) {
-                        openSnackbarSucess(
-                            `Bem-vindo(a) de volta ${
-                                session?.user?.name ? session?.user?.name : ""
-                            }`,
-                            [5000]
-                        );
-                    }
-                })
-                .catch(() => {
-                    setIsUserAuthenticated(false);
-                    openSnackbarWarning(
-                        "Para continuar, por favor digite seu CPF e telefone",
-                        [10000]
-                    );
-                });
+            handleUserOnIdentity();
         }
 
         if (providerAuth === "apple") {
             setOAuthForm(
-                session === null
-                    ? undefined
-                    : {
-                          genders: "",
-                          birthdays: { year: "", month: "", day: "" },
-                          emailAddresses: session?.user?.email
-                              ? session.user?.email
-                              : "",
-                          names: session?.user?.name ? session.user?.name : "",
-                      }
+                getUserFields(
+                    session?.user?.name ?? "",
+                    session?.user?.email ?? ""
+                )
             );
+            return;
         }
 
         GoogleAuthenticate(accessToken).then((res: GoogleTypes) => {
             console.log("res ", res);
             if (res && isUserAuthenticated === false) {
                 setOAuthForm(
-                    session === null
-                        ? undefined
-                        : {
-                              genders: res?.genders?.[0]?.value,
-                              birthdays: {
-                                  year: res?.birthdays?.[0]?.date?.year,
-                                  month: res?.birthdays?.[0]?.date?.month,
-                                  // eslint-disable-next-line no-unsafe-optional-chaining
-                                  day: res?.birthdays?.[0]?.date?.day,
-                              },
-                              emailAddresses: res?.emailAddresses?.[0]?.value,
-                              names: res?.names?.[0]?.displayName,
-                          }
+                    getUserFields(
+                        res?.names?.[0]?.displayName,
+                        res?.emailAddresses?.[0]?.value,
+                        res?.genders?.[0]?.value,
+                        {
+                            year: res?.birthdays?.[0]?.date?.year,
+                            month: res?.birthdays?.[0]?.date?.month,
+                            day: res?.birthdays?.[0]?.date?.day,
+                        }
+                    )
                 );
             }
         });
@@ -174,6 +176,7 @@ const FormBody = () => {
     }, [accessToken]);
 
     console.log("oAuthForm ", oAuthForm);
+    console.log("birthdateValue ", birthdateValue);
 
     const onSubmit = (Formdata: unknown) => {
         const body = {
@@ -186,11 +189,16 @@ const FormBody = () => {
         console.log("body ", body);
 
         if (session) {
-            OAuth(`${providerAuth}Auth`, idToken, body.cpf)
+            identityOAuth(`${providerAuth}Auth`, idToken, body.cpf)
                 .then(res => {
                     console.log("OAuth ", res);
 
                     if ("access_token" in res) {
+                        keepUserloggedIn(
+                            providerAuth,
+                            res.access_token,
+                            accessToken
+                        );
                         openSnackbarSucess(
                             `Bem-vindo(a) de volta ${
                                 session?.user?.name ? session?.user?.name : ""
@@ -204,7 +212,7 @@ const FormBody = () => {
                 })
                 // eslint-disable-next-line consistent-return
                 .catch(e => {
-                    if (e.response.data.error === "invalid_grant")
+                    if (e?.response?.data?.error === "invalid_grant")
                         return insertCliente(body);
                 });
         } else {
@@ -247,19 +255,29 @@ const FormBody = () => {
                                                 name="name"
                                                 placeholder="Ex. Francisca Gomes"
                                                 register={register}
-                                                required={
-                                                    oAuthForm?.names !==
-                                                    undefined
-                                                        ? undefined
-                                                        : "O campo nome é obrigatório!"
-                                                }
+                                                required="O campo nome é obrigatório!"
                                                 hasError={!!errors.name}
-                                                value={
-                                                    oAuthForm?.names ===
-                                                    undefined
-                                                        ? undefined
-                                                        : oAuthForm.names
+                                                value={oAuthForm?.names}
+                                                onBlur={({ target }) =>
+                                                    setValue(
+                                                        "name",
+                                                        target.value
+                                                    )
                                                 }
+                                                onChange={({ target }) => {
+                                                    setValue(
+                                                        "name",
+                                                        target.value
+                                                    );
+                                                    setOAuthForm(
+                                                        ({ ...value }) => {
+                                                            return {
+                                                                ...value,
+                                                                names: target.value,
+                                                            };
+                                                        }
+                                                    );
+                                                }}
                                             />
                                             {errors.name?.message && (
                                                 <FieldError
@@ -356,8 +374,10 @@ const FormBody = () => {
                                                     )
                                                 }
                                                 value={
-                                                    oAuthForm?.birthdays.day !==
-                                                    undefined
+                                                    isUserAuthenticated
+                                                        ? undefined
+                                                        : oAuthForm?.birthdays
+                                                              .day !== undefined
                                                         ? `${oAuthForm?.birthdays?.day}-${oAuthForm?.birthdays.month}-${oAuthForm?.birthdays.year}`
                                                         : undefined
                                                 }
@@ -450,8 +470,10 @@ const FormBody = () => {
                                         >
                                             <RadioButton
                                                 checked={
-                                                    oAuthForm?.genders ===
-                                                    "male"
+                                                    isUserAuthenticated
+                                                        ? undefined
+                                                        : oAuthForm?.genders ===
+                                                          "male"
                                                         ? true
                                                         : undefined
                                                 }
@@ -464,8 +486,10 @@ const FormBody = () => {
                                             />
                                             <RadioButton
                                                 checked={
-                                                    oAuthForm?.genders ===
-                                                    "female"
+                                                    isUserAuthenticated
+                                                        ? undefined
+                                                        : oAuthForm?.genders ===
+                                                          "female"
                                                         ? true
                                                         : undefined
                                                 }
@@ -500,6 +524,12 @@ const FormBody = () => {
                                                 type="email"
                                                 placeholder="Ex. francisca@mail.com"
                                                 register={register}
+                                                disabled={
+                                                    isUserAuthenticated
+                                                        ? undefined
+                                                        : oAuthForm?.emailAddresses !==
+                                                          undefined
+                                                }
                                                 required={
                                                     oAuthForm?.emailAddresses !==
                                                     undefined
@@ -512,16 +542,14 @@ const FormBody = () => {
                                                 }}
                                                 hasError={!!errors.email}
                                                 setValue={() =>
-                                                    oAuthForm?.emailAddresses ===
+                                                    oAuthForm?.emailAddresses ??
                                                     undefined
-                                                        ? undefined
-                                                        : oAuthForm.emailAddresses
                                                 }
                                                 value={
-                                                    oAuthForm?.emailAddresses ===
-                                                    undefined
+                                                    isUserAuthenticated
                                                         ? undefined
-                                                        : oAuthForm.emailAddresses
+                                                        : oAuthForm?.emailAddresses ??
+                                                          undefined
                                                 }
                                             />
                                             {errors.email?.message && (
@@ -585,7 +613,12 @@ const FormBody = () => {
                                     gap={theme.space.x4}
                                 >
                                     <Checkbox
-                                        checked={oAuthForm !== undefined}
+                                        checked={
+                                            isUserAuthenticated
+                                                ? undefined
+                                                : oAuthForm?.emailAddresses !==
+                                                  undefined
+                                        }
                                         id="accept-form"
                                         name="acceptedTermsUse"
                                         register={register}
@@ -628,9 +661,13 @@ const FormBody = () => {
                             >
                                 <CreateAccountButtonContainer>
                                     <Button
-                                        backgroundColor="#d34836"
-                                        mouseOverColor={
+                                        height={theme.space.x14}
+                                        width="137px"
+                                        backgroundColor={
                                             theme.colors.primary["200"]
+                                        }
+                                        mouseOverColor={
+                                            theme.colors.primary["300"]
                                         }
                                         rounded
                                         onClick={handleSubmit(onSubmit)}

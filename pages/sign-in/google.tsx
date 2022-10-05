@@ -18,6 +18,7 @@ const SignInPage = () => {
     return (
         <ContentSignInStyle>
             <SignInStyle />
+            <span>Um momento...</span>
         </ContentSignInStyle>
     );
 };

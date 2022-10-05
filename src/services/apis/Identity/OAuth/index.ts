@@ -6,7 +6,7 @@
 
 import axios from "axios";
 
-export const OAuth = async (
+export const identityOAuth = async (
     grantType: string,
     idToken: string,
     cpfClient?: string
