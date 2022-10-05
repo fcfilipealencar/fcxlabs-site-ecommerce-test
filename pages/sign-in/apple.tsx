@@ -11,7 +11,7 @@ const SignInPage = () => {
                 // eslint-disable-next-line no-restricted-globals
                 callbackUrl: `${location.origin}/sign-in/apple`,
                 redirect: true,
-            });
+            }).then(() => window.close());
 
         if (status === "authenticated") window.close();
         if (session) window.close();
