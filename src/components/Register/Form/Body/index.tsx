@@ -613,12 +613,7 @@ const FormBody = () => {
                                     gap={theme.space.x4}
                                 >
                                     <Checkbox
-                                        checked={
-                                            isUserAuthenticated
-                                                ? undefined
-                                                : oAuthForm?.emailAddresses !==
-                                                  undefined
-                                        }
+                                        checked={isUserAuthenticated}
                                         id="accept-form"
                                         name="acceptedTermsUse"
                                         register={register}
