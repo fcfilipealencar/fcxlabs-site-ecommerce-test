@@ -21,9 +21,6 @@ export default NextAuth({
         AppleProvider({
             clientId: process.env.APPLE_CLIENT_ID!,
             clientSecret: process.env.APPLE_CLIENT_SECRET!,
-            authorization: {
-                params: { scope: "name email", response_mode: "form_post" },
-            },
         }),
     ],
     secret: process.env.SECRET,
@@ -40,6 +37,13 @@ export default NextAuth({
                 user && (token.user = user);
             }
             return token;
+        },
+        async redirect({ url, baseUrl }) {
+            // Allows relative callback URLs
+            if (url.startsWith("/")) return `${baseUrl}${url}`;
+            // Allows callback URLs on the same origin
+            if (new URL(url).origin === baseUrl) return url;
+            return baseUrl;
         },
         async session({ session, token, user }) {
             session.token = token;
