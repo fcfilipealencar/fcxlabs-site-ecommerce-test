@@ -137,7 +137,7 @@ const FormBody = () => {
     };
 
     console.log("session ", session);
-    console.log("status ", status);
+    console.log("status auth", status);
     console.log("isUserAuthenticated ", isUserAuthenticated);
 
     useEffect(() => {

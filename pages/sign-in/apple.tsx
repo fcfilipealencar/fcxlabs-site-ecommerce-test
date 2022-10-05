@@ -10,6 +10,7 @@ const SignInPage = () => {
             void signIn("apple", {
                 // eslint-disable-next-line no-restricted-globals
                 callbackUrl: `${location.origin}/sign-in/google`,
+                redirect: true,
             });
 
         if (session) window.close();
